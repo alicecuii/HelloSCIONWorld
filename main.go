@@ -19,7 +19,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/alicecuii/helloscionworld/regionrule"
+	"github.com/alicecuii/HelloSCIONWorld/regionrule"
 	"github.com/netsec-ethz/scion-apps/pkg/pan"
 	"inet.af/netaddr"
 	"os"
