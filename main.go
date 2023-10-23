@@ -33,8 +33,8 @@ func main() {
 	var listen pan.IPPortValue
 	var preference string
 	var region_rule string
-	var prefs []string
-	prefs, err = regionrule.GetPreferences()
+	var rules []regionrule.Rule
+	rules, err = regionrule.GetRules()
 
 	flag.Var(&listen, "listen", "[Server] local IP:port to listen on")
 	flag.StringVar(&preference, "preference", "", "Preference sorting order for paths. "+
@@ -42,11 +42,14 @@ func main() {
 		strings.Join(pan.AvailablePreferencePolicies, "|"))
 	flag.StringVar(&region_rule, "region_rule", "", "Preference sorting order for paths. "+
 		"Comma-separated list of available sorting options: "+
-		strings.Join(prefs, "|"))
+		strings.Join(rules.Preference, "|"))
 
 	remoteAddr := flag.String("remote", "", "[Client] Remote (i.e. the server's) SCION Address (e.g. 17-ffaa:1:1,[127.0.0.1]:12345)")
 	count := flag.Uint("count", 1, "[Client] Number of messages to send")
 	flag.Parse()
+	if region_rule != "" {
+
+	}
 	policy, err := pan.PolicyFromCommandline("", preference, false)
 	if (listen.Get().Port() > 0) == (len(*remoteAddr) > 0) {
 		check(fmt.Errorf("either specify -listen for server or -remote for client"))

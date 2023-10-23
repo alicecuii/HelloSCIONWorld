@@ -21,7 +21,7 @@ type AppConfig struct {
 	} `yaml:"apps"`
 }
 
-func GetPreferences() ([]string, error) {
+func GetRules() ([]Rule, error) {
 	fileURL := "https://raw.githubusercontent.com/alicecuii/HelloSCIONWorld/main/configfiles/app.yml"
 	// Make an HTTP GET request to the YAML file
 	response, err := http.Get(fileURL)
@@ -45,12 +45,12 @@ func GetPreferences() ([]string, error) {
 
 	// Print the parsed configuration to the screen
 	fmt.Printf("Parsed YAML Configuration:\n")
-	var preferences []string
+	var rules []Rule
 	for _, app := range config.Apps {
 		for _, rule := range app.Rules {
-			preferences = append(preferences, rule.Preference)
+			rules = append(rules, rule)
 		}
 	}
 
-	return preferences, nil
+	return rules, nil
 }
