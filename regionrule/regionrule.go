@@ -22,8 +22,9 @@ type AppConfig struct {
 }
 
 func GetPreferences(filePath string) ([]string, error) {
+	fileURL := "https://github.com/alicecuii/HelloSCIONWorld/blob/main/configfiles/app.yml"
 	// Open the YAML file
-	file, err := os.Open("app.yml")
+	file, err := os.Open(fileURL)
 	if err != nil {
 		log.Fatalf("Error opening YAML file: %v", err)
 	}
