@@ -2,10 +2,11 @@ package regionrule
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io"
 	"log"
 	"os"
+
+	"gopkg.in/yaml.v2"
 )
 
 type Rule struct {
@@ -21,7 +22,7 @@ type AppConfig struct {
 	} `yaml:"apps"`
 }
 
-func GetPreferences(filePath string) ([]string, error) {
+func GetPreferences() ([]string, error) {
 	fileURL := "https://github.com/alicecuii/HelloSCIONWorld/blob/main/configfiles/app.yml"
 	// Open the YAML file
 	file, err := os.Open(fileURL)
