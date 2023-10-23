@@ -19,13 +19,11 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/alicecuii/HelloSCIONWorld/regionrule"
+	"github.com/netsec-ethz/scion-apps/pkg/pan"
+	"inet.af/netaddr"
 	"os"
 	"strings"
 	"time"
-
-	"github.com/netsec-ethz/scion-apps/pkg/pan"
-	"inet.af/netaddr"
 )
 
 func main() {
@@ -88,7 +86,7 @@ func runServer(listen netaddr.IPPort) error {
 }
 
 func runClient(address string, count int, policy pan.Policy) error {
-	addr, err := pan.ResolveUDPAddr(context.TODO(), address)
+	addr, err := pan.ResolveUDPAddr(address)
 	if err != nil {
 		return err
 	}
