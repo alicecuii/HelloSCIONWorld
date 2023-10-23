@@ -2,11 +2,10 @@ package regionrule
 
 import (
 	"fmt"
-	"io"
-	"log"
-	"os"
-
 	"gopkg.in/yaml.v2"
+	"io/ioutil"
+	"log"
+	"net/http"
 )
 
 type Rule struct {
@@ -24,22 +23,16 @@ type AppConfig struct {
 
 func GetPreferences() ([]string, error) {
 	fileURL := "https://raw.githubusercontent.com/alicecuii/HelloSCIONWorld/main/configfiles/app.yml"
-	// Open the YAML file
-	file, err := os.Open(fileURL)
+	// Make an HTTP GET request to the YAML file
+	response, err := http.Get(fileURL)
 	if err != nil {
-		log.Fatalf("Error opening YAML filess: %v", err)
+		fmt.Println("Error:", err)
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			log.Fatalf("Error closing YAML file: %v", err)
-		}
-	}(file)
+	defer response.Body.Close()
 
-	// Read the YAML data from the file
-	yamlData, err := io.ReadAll(file)
+	yamlData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		log.Fatalf("Error reading YAML file: %v", err)
+		fmt.Println("Error:", err)
 	}
 
 	// Unmarshal the YAML data into the AppConfig struct
@@ -48,6 +41,7 @@ func GetPreferences() ([]string, error) {
 	if err != nil {
 		log.Fatalf("Error unmarshaling YAML: %v", err)
 	}
+	// Read the YAML content from the response
 
 	// Print the parsed configuration to the screen
 	fmt.Printf("Parsed YAML Configuration:\n")
