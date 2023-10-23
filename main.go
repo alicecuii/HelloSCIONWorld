@@ -34,7 +34,7 @@ func main() {
 	var preference string
 	var region_rule string
 	var prefs []string
-	prefs, err = regionrule.GetPreferences("app.yml")
+	prefs, err = regionrule.GetPreferences()
 
 	flag.Var(&listen, "listen", "[Server] local IP:port to listen on")
 	flag.StringVar(&preference, "preference", "", "Preference sorting order for paths. "+
