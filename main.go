@@ -19,12 +19,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/alicecuii/HelloSCIONWorld/regionrule"
-	"github.com/netsec-ethz/scion-apps/pkg/pan"
-	"inet.af/netaddr"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/alicecuii/HelloSCIONWorld/regionrule"
+	"github.com/netsec-ethz/scion-apps/pkg/pan"
+	"inet.af/netaddr"
 )
 
 func main() {
@@ -35,6 +36,20 @@ func main() {
 	var region_rule string
 	var rules []regionrule.Rule
 	rules, err = regionrule.GetRules()
+	// Initialize an empty slice to store the Preference values
+	preferences := []string{}
+
+	// Iterate through the list of rules and collect the Preference values
+	for _, rule := range rules {
+		preferences = append(preferences, rule.Preference)
+	}
+	// Create a map where the keys are rule names and the values are preferences
+	rulePreferences := make(map[string]string)
+
+	// Populate the map
+	for _, rule := range rules {
+		rulePreferences[rule.Name] = rule.Preference
+	}
 
 	flag.Var(&listen, "listen", "[Server] local IP:port to listen on")
 	flag.StringVar(&preference, "preference", "", "Preference sorting order for paths. "+
@@ -42,13 +57,13 @@ func main() {
 		strings.Join(pan.AvailablePreferencePolicies, "|"))
 	flag.StringVar(&region_rule, "region_rule", "", "Preference sorting order for paths. "+
 		"Comma-separated list of available sorting options: "+
-		strings.Join(rules.Preference, "|"))
+		strings.Join(preferences, "|"))
 
 	remoteAddr := flag.String("remote", "", "[Client] Remote (i.e. the server's) SCION Address (e.g. 17-ffaa:1:1,[127.0.0.1]:12345)")
 	count := flag.Uint("count", 1, "[Client] Number of messages to send")
 	flag.Parse()
 	if region_rule != "" {
-
+		preference = rulePreferences[region_rule]
 	}
 	policy, err := pan.PolicyFromCommandline("", preference, false)
 	if (listen.Get().Port() > 0) == (len(*remoteAddr) > 0) {
@@ -59,7 +74,7 @@ func main() {
 		err = runServer(listen.Get())
 		check(err)
 	} else {
-		err = runClient(*remoteAddr, int(*count), policy)
+		err = runClient(*remoteAddr, int(*count), policy, preference)
 		check(err)
 	}
 }
@@ -89,12 +104,14 @@ func runServer(listen netaddr.IPPort) error {
 	}
 }
 
-func runClient(address string, count int, policy pan.Policy) error {
+func runClient(address string, count int, policy pan.Policy, policyName string) error {
 	addr, err := pan.ResolveUDPAddr(address)
 	if err != nil {
 		return err
 	}
+	fmt.Printf("Using %s policy.\n", policyName)
 	conn, err := pan.DialUDP(context.Background(), netaddr.IPPort{}, addr, policy, nil)
+
 	if err != nil {
 		return err
 	}

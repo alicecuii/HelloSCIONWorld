@@ -2,10 +2,11 @@ package regionrule
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"gopkg.in/yaml.v2"
 )
 
 type Rule struct {
@@ -44,7 +45,7 @@ func GetRules() ([]Rule, error) {
 	// Read the YAML content from the response
 
 	// Print the parsed configuration to the screen
-	fmt.Printf("Parsed YAML Configuration:\n")
+	// fmt.Printf("Parsed YAML Configuration:\n")
 	var rules []Rule
 	for _, app := range config.Apps {
 		for _, rule := range app.Rules {
