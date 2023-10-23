@@ -1,7 +1,9 @@
 module github.com/alicecuii/HelloSCIONWorld
 
 go 1.16
+
 require (
+	github.com/alicecuii/helloscionworld v0.0.0-20231023023457-b88d61b966c0 // indirect
 	github.com/antlr/antlr4 v0.0.0-20181218183524-be58ebffde8e // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/britram/borat v0.0.0-20181011130314-f891bcfcfb9b // indirect
