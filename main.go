@@ -46,7 +46,7 @@ func main() {
 	// get local and remote addresses from program arguments:
 	var (
 		listen      pan.IPPortValue
-		region_rule string
+		rule        string
 		interactive bool
 		sequence    string
 		preference  string
@@ -56,19 +56,19 @@ func main() {
 	preferences := []string{}
 	rules, err = regionrule.GetRules()
 	// Iterate through the list of rules and collect the Preference values
-	for _, rule := range rules {
-		preferences = append(preferences, rule.Preference)
+	for _, rule1 := range rules {
+		preferences = append(preferences, rule1.Preference)
 	}
 	// Create a map where the keys are rule names and the values are preferences
 	rulePreferences := make(map[string]string)
 	// Populate the map
-	for _, rule := range rules {
-		rulePreferences[rule.Name] = rule.Preference
+	for _, rule1 := range rules {
+		rulePreferences[rule1.Name] = rule1.Preference
 	}
 
 	flag.Var(&listen, "listen", "[Server] local IP:port to listen on")
 	flag.StringVar(&remoteAddr, "remote", "", "[Client] Remote (i.e. the server's) SCION Address (e.g. 17-ffaa:1:1,[127.0.0.1]:12345)")
-	flag.StringVar(&region_rule, "region_rule", "", "Preference sorting order for paths. "+
+	flag.StringVar(&rule, "rule", "", "Preference sorting order for paths. "+
 		"Comma-separated list of available sorting options: "+
 		strings.Join(preferences, "|"))
 
@@ -80,7 +80,13 @@ func main() {
 
 	count := flag.Uint("count", 1, "[Client] Number of messages to send")
 	flag.Parse()
-	fmt.Println(interactive)
+
+	if preference != "" && rule != "" {
+		check(fmt.Errorf("either specify -preference or -rule"))
+	} else if preference == "" && rule != "" {
+		preference = rule
+	}
+
 	policy, err := pan.PolicyFromCommandline(sequence, preference, interactive)
 	checkUsageErr(err)
 

@@ -10,9 +10,9 @@ import (
 )
 
 type Rule struct {
-	Name       string `yaml:"name"`
-	ISD        int    `yaml:"ISD"`
-	Preference string `yaml:"Preference"`
+	Name          string `yaml:"name"`
+	Permitted_ISD int    `yaml:"Permitted_ISD"`
+	Preference    string `yaml:"Preference"`
 }
 
 type AppConfig struct {
