@@ -57,7 +57,7 @@ func main() {
 	rules, err = regionrule.GetRules()
 	// Iterate through the list of rules and collect the Preference values
 	for _, rule1 := range rules {
-		preferences = append(preferences, rule1.Preference)
+		preferences = append(preferences, rule1.Name)
 	}
 	// Create a map where the keys are rule names and the values are preferences
 	rulePreferences := make(map[string]string)
