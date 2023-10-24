@@ -28,45 +28,63 @@ import (
 	"inet.af/netaddr"
 )
 
+func usageErr(msg string) {
+	if msg != "" {
+		fmt.Println("\nError:", msg)
+	}
+	os.Exit(2)
+}
+
+func checkUsageErr(err error) {
+	if err != nil {
+		usageErr(err.Error())
+	}
+}
+
 func main() {
 	var err error
 	// get local and remote addresses from program arguments:
-	var listen pan.IPPortValue
-	var preference string
-	var region_rule string
-	var rules []regionrule.Rule
-	rules, err = regionrule.GetRules()
-	// Initialize an empty slice to store the Preference values
+	var (
+		listen      pan.IPPortValue
+		region_rule string
+		interactive bool
+		sequence    string
+		preference  string
+		rules       []regionrule.Rule
+		remoteAddr  string
+	)
 	preferences := []string{}
-
+	rules, err = regionrule.GetRules()
 	// Iterate through the list of rules and collect the Preference values
 	for _, rule := range rules {
 		preferences = append(preferences, rule.Preference)
 	}
 	// Create a map where the keys are rule names and the values are preferences
 	rulePreferences := make(map[string]string)
-
 	// Populate the map
 	for _, rule := range rules {
 		rulePreferences[rule.Name] = rule.Preference
 	}
 
 	flag.Var(&listen, "listen", "[Server] local IP:port to listen on")
-	flag.StringVar(&preference, "preference", "", "Preference sorting order for paths. "+
-		"Comma-separated list of available sorting options: "+
-		strings.Join(pan.AvailablePreferencePolicies, "|"))
+	flag.StringVar(&remoteAddr, "remote", "", "[Client] Remote (i.e. the server's) SCION Address (e.g. 17-ffaa:1:1,[127.0.0.1]:12345)")
 	flag.StringVar(&region_rule, "region_rule", "", "Preference sorting order for paths. "+
 		"Comma-separated list of available sorting options: "+
 		strings.Join(preferences, "|"))
 
-	remoteAddr := flag.String("remote", "", "[Client] Remote (i.e. the server's) SCION Address (e.g. 17-ffaa:1:1,[127.0.0.1]:12345)")
+	flag.BoolVar(&interactive, "i", false, "Interactive path selection, prompt to choose path")
+	flag.StringVar(&sequence, "sequence", "", "Sequence of space separated hop predicates to specify path")
+	flag.StringVar(&preference, "preference", "", "Preference sorting order for paths. "+
+		"Comma-separated list of available sorting options: "+
+		strings.Join(pan.AvailablePreferencePolicies, "|"))
+
 	count := flag.Uint("count", 1, "[Client] Number of messages to send")
 	flag.Parse()
-	if region_rule != "" {
-		preference = rulePreferences[region_rule]
-	}
-	policy, err := pan.PolicyFromCommandline("", preference, false)
-	if (listen.Get().Port() > 0) == (len(*remoteAddr) > 0) {
+	fmt.Println(interactive)
+	policy, err := pan.PolicyFromCommandline(sequence, preference, interactive)
+	checkUsageErr(err)
+
+	if (listen.Get().Port() > 0) == (len(remoteAddr) > 0) {
 		check(fmt.Errorf("either specify -listen for server or -remote for client"))
 	}
 
@@ -74,7 +92,7 @@ func main() {
 		err = runServer(listen.Get())
 		check(err)
 	} else {
-		err = runClient(*remoteAddr, int(*count), policy, preference)
+		err = runClient(remoteAddr, int(*count), policy)
 		check(err)
 	}
 }
@@ -104,17 +122,21 @@ func runServer(listen netaddr.IPPort) error {
 	}
 }
 
-func runClient(address string, count int, policy pan.Policy, policyName string) error {
+func runClient(address string, count int, policy pan.Policy) error {
 	addr, err := pan.ResolveUDPAddr(address)
 	if err != nil {
+		fmt.Println("server address error")
 		return err
 	}
-	fmt.Printf("Using %s policy.\n", policyName)
-	conn, err := pan.DialUDP(context.Background(), netaddr.IPPort{}, addr, policy, nil)
-
+	//Select path to control connection
+	pathSelector := pan.NewDefaultSelector()
+	conn, err := pan.DialUDP(context.Background(), netaddr.IPPort{}, addr, policy, pathSelector)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
+	fmt.Print("Chosen path: ")
+	fmt.Println(pathSelector.Path())
 	defer conn.Close()
 
 	for i := 0; i < count; i++ {
