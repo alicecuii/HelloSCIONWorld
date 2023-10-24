@@ -86,7 +86,7 @@ func main() {
 	} else if preference == "" && rule != "" {
 		preference = rulePreferences[rule]
 	}
-
+	fmt.Println("preference: %s", preference)
 	policy, err := pan.PolicyFromCommandline(sequence, preference, interactive)
 	checkUsageErr(err)
 
@@ -134,7 +134,7 @@ func runClient(address string, count int, policy pan.Policy) error {
 		fmt.Println("server address error")
 		return err
 	}
-	fmt.Println("policy: %s", policy)
+	fmt.Println(policy)
 	//Select path to control connection
 	pathSelector := pan.NewDefaultSelector()
 	conn, err := pan.DialUDP(context.Background(), netaddr.IPPort{}, addr, policy, pathSelector)
