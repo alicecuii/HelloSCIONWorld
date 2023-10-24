@@ -134,7 +134,6 @@ func runClient(address string, count int, policy pan.Policy) error {
 		fmt.Println("server address error")
 		return err
 	}
-	fmt.Println(policy)
 	//Select path to control connection
 	pathSelector := pan.NewDefaultSelector()
 	conn, err := pan.DialUDP(context.Background(), netaddr.IPPort{}, addr, policy, pathSelector)
