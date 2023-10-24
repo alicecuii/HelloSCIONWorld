@@ -86,7 +86,7 @@ func main() {
 	} else if preference == "" && rule != "" {
 		preference = rulePreferences[rule]
 	}
-	fmt.Println("preference: %s", preference)
+	fmt.Println("preference: ", preference)
 	policy, err := pan.PolicyFromCommandline(sequence, preference, interactive)
 	checkUsageErr(err)
 
