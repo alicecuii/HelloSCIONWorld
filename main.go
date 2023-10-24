@@ -53,11 +53,11 @@ func main() {
 		rules       []regionrule.Rule
 		remoteAddr  string
 	)
-	preferences := []string{}
+	rule_names := []string{}
 	rules, err = regionrule.GetRules()
 	// Iterate through the list of rules and collect the Preference values
 	for _, rule1 := range rules {
-		preferences = append(preferences, rule1.Name)
+		rule_names = append(rule_names, rule1.Name)
 	}
 	// Create a map where the keys are rule names and the values are preferences
 	rulePreferences := make(map[string]string)
@@ -70,7 +70,7 @@ func main() {
 	flag.StringVar(&remoteAddr, "remote", "", "[Client] Remote (i.e. the server's) SCION Address (e.g. 17-ffaa:1:1,[127.0.0.1]:12345)")
 	flag.StringVar(&rule, "rule", "", "Preference sorting order for paths. "+
 		"Comma-separated list of available sorting options: "+
-		strings.Join(preferences, "|"))
+		strings.Join(rule_names, "|"))
 
 	flag.BoolVar(&interactive, "i", false, "Interactive path selection, prompt to choose path")
 	flag.StringVar(&sequence, "sequence", "", "Sequence of space separated hop predicates to specify path")
@@ -84,7 +84,7 @@ func main() {
 	if preference != "" && rule != "" {
 		check(fmt.Errorf("either specify -preference or -rule"))
 	} else if preference == "" && rule != "" {
-		preference = rule
+		preference = rulePreferences[rule]
 	}
 
 	policy, err := pan.PolicyFromCommandline(sequence, preference, interactive)
