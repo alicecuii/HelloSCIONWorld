@@ -2,17 +2,17 @@ apps:
   - name: app1-net-rules
     rules:
       - name: north-america-low-latency
-        Permitted_ISD: 17
+        Permitted_ISD: [17,18]
         Preference: latency
 
       - name: north-america-bandwidth
-        Permitted_ISD: 17
+        Permitted_ISD: [17,18]
         Preference: bandwidth
 
       - name: north-america-hops
-        Permitted_ISD: 17
+        Permitted_ISD: [17]
         Preference: hops
 
       - name: north-america-mtu
-        Permitted_ISD: 17
+        Permitted_ISD: [17,18]
         Preference: mtu

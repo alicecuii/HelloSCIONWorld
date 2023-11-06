@@ -11,7 +11,7 @@ import (
 
 type Rule struct {
 	Name          string `yaml:"name"`
-	Permitted_ISD int    `yaml:"Permitted_ISD"`
+	Permitted_ISD []int  `yaml:"Permitted_ISD"`
 	Preference    string `yaml:"Preference"`
 }
 
