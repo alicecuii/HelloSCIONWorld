@@ -5,12 +5,12 @@ which replies back.
 
 Server:
 ```
-go run helloworld.go -listen 127.0.0.1:1234
+go run main.go -listen 127.0.0.1:1234
 ```
 
 Client:
 ```
-go run helloworld.go -remote 17-ffaa:1:a,[127.0.0.1]:1234
+go run main.go -remote 17-ffaa:1:a,[127.0.0.1]:1234
 ```
 
 Replace `17-ffaa:1:a` with the address of the AS in which the server is running.

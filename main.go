@@ -45,13 +45,14 @@ func main() {
 	var err error
 	// get local and remote addresses from program arguments:
 	var (
-		listen      pan.IPPortValue
-		rule        string
-		interactive bool
-		sequence    string
-		preference  string
-		rules       []regionrule.Rule
-		remoteAddr  string
+		listen        pan.IPPortValue
+		rule          string
+		interactive   bool
+		sequence      string
+		preference    string
+		rules         []regionrule.Rule
+		remoteAddr    string
+		permitted_ISD []int
 	)
 	rule_names := []string{}
 	rules, err = regionrule.GetRules()
@@ -61,9 +62,17 @@ func main() {
 	}
 	// Create a map where the keys are rule names and the values are preferences
 	rulePreferences := make(map[string]string)
+	ruleISDs := make(map[string][]int)
 	// Populate the map
 	for _, rule1 := range rules {
 		rulePreferences[rule1.Name] = rule1.Preference
+		// Check if the rule name already exists in the map
+		if _, ok := ruleISDs[rule1.Name]; !ok {
+			// If it doesn't exist, create a new entry with an empty slice
+			ruleISDs[rule1.Name] = []int{}
+		}
+		// Append the permitted ISD values to the slice
+		ruleISDs[rule1.Name] = append(ruleISDs[rule1.Name], rule1.Permitted_ISD...)
 	}
 
 	flag.Var(&listen, "listen", "[Server] local IP:port to listen on")
@@ -85,6 +94,7 @@ func main() {
 		check(fmt.Errorf("either specify -preference or -rule"))
 	} else if preference == "" && rule != "" {
 		preference = rulePreferences[rule]
+		permitted_ISD = ruleISDs[rule]
 	}
 	fmt.Println("preference: ", preference)
 	policy, err := pan.PolicyFromCommandline(sequence, preference, interactive)
@@ -98,7 +108,7 @@ func main() {
 		err = runServer(listen.Get())
 		check(err)
 	} else {
-		err = runClient(remoteAddr, int(*count), policy)
+		err = runClient(remoteAddr, int(*count), policy, permitted_ISD)
 		check(err)
 	}
 }
@@ -128,7 +138,7 @@ func runServer(listen netaddr.IPPort) error {
 	}
 }
 
-func runClient(address string, count int, policy pan.Policy) error {
+func runClient(address string, count int, policy pan.Policy, isds []int) error {
 	addr, err := pan.ResolveUDPAddr(address)
 	if err != nil {
 		fmt.Println("server address error")
@@ -141,6 +151,7 @@ func runClient(address string, count int, policy pan.Policy) error {
 		fmt.Println(err)
 		return err
 	}
+	fmt.Println(isds)
 	fmt.Print("Chosen path: ")
 	fmt.Println(pathSelector.Path())
 	defer conn.Close()
